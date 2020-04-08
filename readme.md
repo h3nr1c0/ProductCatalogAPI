@@ -33,4 +33,8 @@ npm run test-all
 ```
 
 ## 5. API Documentation
-  see folder docs/apidocs
+  Generate new documentattion:
+  ```
+  gulp apidoc
+  ```
+  see folder ./docs/apidocs/index.html
