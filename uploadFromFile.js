@@ -1,12 +1,7 @@
-// const express = require('express')
-// const bodyParser = require('body-parser')
 const secret = require('./secret.json')
 const fsp = require('fs').promises
 
-// const app = express()
-
 require('dotenv').config()
-// const port = process.env.SERVER_PORT
 
 const mongoAuth = secret.mongoAtlasAuth
 
@@ -14,7 +9,6 @@ const getMongoConnectionStr = _ => {
   return `mongodb+srv://${mongoAuth.name}:${mongoAuth.password}@yay-kclbk.mongodb.net/test?retryWrites=true&w=majority`
 }
 
-// ******************************** MONG ************************************************
 const MongoClient = require('mongodb').MongoClient
 const connectionString = getMongoConnectionStr()
 
