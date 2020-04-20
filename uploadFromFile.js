@@ -29,7 +29,6 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
         dbCollection.insertMany(products)
           .then(result => {
             console.log('catalog data uploaded')
-            // res.redirect('/') // redirect to root
           })
           .catch(error => console.error(error))
       })
