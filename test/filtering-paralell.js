@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-expressions */
-const parallel = require('mocha.parallel');
+const parallel = require('mocha.parallel')
 const supertest = require('supertest')
 var expect = require('chai').expect
 
