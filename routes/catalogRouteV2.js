@@ -1,8 +1,7 @@
 // Version 2
 const express = require('express')
 const router = express.Router()
-const { validationResult } = require('express-validator')
-const { validateProduct, createProduct, saveProduct, readProducts } = require('../src/product')
+const { validateProduct } = require('../src/product')
 
 require('dotenv').config()
 
