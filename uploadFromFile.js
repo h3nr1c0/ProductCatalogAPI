@@ -1,0 +1,37 @@
+const secret = require('./secret.json')
+const fsp = require('fs').promises
+
+require('dotenv').config()
+
+const mongoAuth = secret.mongoAtlasAuth
+
+const getMongoConnectionStr = _ => {
+  return `mongodb+srv://${mongoAuth.name}:${mongoAuth.password}@yay-kclbk.mongodb.net/test?retryWrites=true&w=majority`
+}
+
+const MongoClient = require('mongodb').MongoClient
+const connectionString = getMongoConnectionStr()
+
+const dbName = process.env.DB_NAME
+const collectioName = process.env.COLLECTION_NAME
+const catalogFileName = `./${process.env.PRODUCT_CATALOG_PATH}/${process.env.PRODUCT_CATALOG_FILE}`
+
+MongoClient.connect(connectionString, { useUnifiedTopology: true })
+  .then(client => {
+    console.log('Connected to Database')
+    // read catalog from file
+    fsp.readFile(catalogFileName)
+      .then(data => {
+        const products = JSON.parse(data)
+
+        const db = client.db(dbName)
+        const dbCatalog = db.collection(collectioName)
+        // upload catalog to db
+        dbCatalog.insertMany(products)
+          .then(result => {
+            console.log('catalog data uploaded')
+          })
+          .catch(error => console.error(error))
+      })
+      .catch(error => console.error(error))
+  })
