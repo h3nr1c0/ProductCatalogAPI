@@ -9,7 +9,7 @@ var testRoute = require('./routes/testRoute')
 var catalogRouteV1 = require('./routes/catalogRouteV1')
 var catalogRouteV2 = require('./routes/catalogRouteV2')
 var versionRoutes = require('express-routes-versioning')()
-const secret = require('./secret.json')
+const mongoSecrets = require('./secrets-mongo')
 
 require('dotenv').config()
 const PORT = process.env.SERVER_PORT
@@ -80,14 +80,9 @@ app.use('/', versionRoutes({
 }))
 
 //* **************   Mongo ****************** */
-const mongoAuth = secret.mongoAtlasAuth
-
-const getMongoConnectionStr = _ => {
-  return `mongodb+srv://${mongoAuth.name}:${mongoAuth.password}@yay-kclbk.mongodb.net/test?retryWrites=true&w=majority`
-}
 
 const MongoClient = require('mongodb').MongoClient
-const connectionString = getMongoConnectionStr()
+const connectionString = mongoSecrets.getMongoConnectionStr()
 const dbName = process.env.DB_NAME
 const collectioName = process.env.COLLECTION_NAME
 
@@ -95,8 +90,8 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
   .then(client => {
     console.info('Connected to Database')
     const db = client.db(dbName)
-    const dbCollection = db.collection(collectioName)
-    app.locals.dbCollection = dbCollection
+    const dbCatalog = db.collection(collectioName)
+    app.locals.dbCatalog = dbCatalog
 
     // START THE SERVER
     const server = app.listen(PORT)

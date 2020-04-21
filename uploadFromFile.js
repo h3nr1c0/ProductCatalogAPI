@@ -24,9 +24,9 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
         const products = JSON.parse(data)
 
         const db = client.db(dbName)
-        const dbCollection = db.collection(collectioName)
+        const dbCatalog = db.collection(collectioName)
 
-        dbCollection.insertMany(products)
+        dbCatalog.insertMany(products)
           .then(result => {
             console.log('catalog data uploaded')
           })

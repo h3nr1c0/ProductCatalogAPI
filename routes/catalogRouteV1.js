@@ -36,14 +36,14 @@ router
   * @apiUse UnauthorizedError
   */
   .post(process.env.HOST_PREFIX, validateProduct(), async (req, res, next) => {
-    const dbCollection = req.app.locals.dbCollection
+    const dbCatalog = req.app.locals.dbCatalog
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() })
     }
     // create mutable object for mongo DB, mongo adds _id
     const product = createProduct(req.body, true) // object must be extensible to be mutable
-    dbCollection.insertOne(product)
+    dbCatalog.insertOne(product)
       .then(_ => res.status(201).send())
       .catch(err => res.status(422).send(err))
   })
@@ -84,16 +84,17 @@ router
       * @apiUse UnauthorizedError
       */
   .get(process.env.HOST_PREFIX, async (req, res) => {
-    const dbCollection = req.app.locals.dbCollection
+    const dbCatalog = req.app.locals.dbCatalog
     const query = req.query
     const categories = query.categories
     let findQuery = {}
     if (categories) {
       findQuery = { category: { $in: categories } }
     }
-
-    dbCollection.find(findQuery, { projection: { _id: 0 } }).toArray()
+    // find all by query, exclude mongo field _id from results
+    dbCatalog.find(findQuery, { projection: { _id: 0 } }).toArray()
       .then(results => {
+        // sort by criteria in query
         const sorted = sortProducts(results, query.sort)
         res.status(200).send(sorted)
       })
