@@ -9,16 +9,17 @@ var testRoute = require('./routes/testRoute')
 var catalogRouteV1 = require('./routes/catalogRouteV1')
 var catalogRouteV2 = require('./routes/catalogRouteV2')
 var versionRoutes = require('express-routes-versioning')()
+const secret = require('./secret.json')
 
 require('dotenv').config()
-const port = process.env.SERVER_PORT
+const PORT = process.env.SERVER_PORT
 
 // Configure Passport to use Auth0
 var strategy = new Auth0Strategy({
   domain: process.env.AUTH0_DOMAIN,
   clientID: process.env.AUTH0_CLIENT_ID,
   clientSecret: process.env.AUTH0_CLIENT_SECRET,
-  callbackURL: process.env.AUTH0_CALLBACK_URL || `http://localhost:${port}`
+  callbackURL: process.env.AUTH0_CALLBACK_URL || `http://localhost:${PORT}`
 },
 function (accessToken, refreshToken, extraParams, profile, done) {
   // accessToken is the token to call Auth0 API (not needed in the most cases)
@@ -26,7 +27,6 @@ function (accessToken, refreshToken, extraParams, profile, done) {
   // profile has all the information from the user
   return done(null, profile)
 })
-
 passport.use(strategy)
 
 const app = express()
@@ -79,24 +79,66 @@ app.use('/', versionRoutes({
   '~2.1.1': catalogRouteV2
 }))
 
-// START THE SERVER
-const server = app.listen(port)
+//* **************   Mongo ****************** */
+const mongoAuth = secret.mongoAtlasAuth
 
-/// HANDLE SERVER CLOSING
-server.on('close', () => {
-  console.warn('Closing server ...')
-})
+const getMongoConnectionStr = _ => {
+  return `mongodb+srv://${mongoAuth.name}:${mongoAuth.password}@yay-kclbk.mongodb.net/test?retryWrites=true&w=majority`
+}
 
-process.on('exit', () => {
-  console.warn('Process closed')
-})
+const MongoClient = require('mongodb').MongoClient
+const connectionString = getMongoConnectionStr()
+const dbName = process.env.DB_NAME
+const collectioName = process.env.COLLECTION_NAME
 
-// Handle ^C
-process.on('SIGINT', () => {
-  server.close(() => {
-    console.warn('Server closed')
+MongoClient.connect(connectionString, { useUnifiedTopology: true })
+  .then(client => {
+    console.info('Connected to Database')
+    const db = client.db(dbName)
+    const dbCollection = db.collection(collectioName)
+    app.locals.dbCollection = dbCollection
+
+    // START THE SERVER
+    const server = app.listen(PORT)
+
+    // Handle ^C close DB
+    process.on('SIGINT', _ => {
+      console.info('SIGINT signal received.')
+      console.warn('Closing http server.')
+      server.close(_ => {
+        console.info('Http server closed.')
+        // not forced close DB
+        client.close(false)
+          .then(_ => {
+            console.info('MongoDb connection closed.')
+          })
+          .catch(e => {
+            console.error(e)
+            client.close(true)
+              .then(_ => {
+                console.warn('MongoDb connection closed forcefully.')
+              })
+              .catch(
+                console.error('MongoDb connection can NOT be closed forcefully.')
+              )
+          })
+      })
+    })
+
+    /// HANDLE SERVER CLOSING
+    server.on('close', () => {
+      console.warn('Closing server ...')
+    })
+
+    /// HANDLE SERVER CLOSING
+    process.on('exit', () => {
+      client.close()
+        .then(
+          console.warn('Server closed')
+        )
+    })
   })
-})
+// ---------------------------------------------------------------------------
 
 // Error handlers
 
@@ -111,7 +153,10 @@ if (app.get('env') === 'development') {
   })
 }
 
-console.info(`server running on: http://localhost:${port}`)
+console.info(`server running on: http://localhost:${PORT}`)
+
+// root
+app.get('', (req, res) => res.status(403).send(`add ${process.env.HOST_PREFIX} to end of path`))
 
 // unknown routes
 app.get('**', (req, res) => res.status(404).send('Not Found'))

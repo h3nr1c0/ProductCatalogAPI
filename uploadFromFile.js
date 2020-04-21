@@ -12,8 +12,8 @@ const getMongoConnectionStr = _ => {
 const MongoClient = require('mongodb').MongoClient
 const connectionString = getMongoConnectionStr()
 
-const dbName = 'products'
-const collectioName = 'catalog'
+const dbName = process.env.DB_NAME
+const collectioName = process.env.COLLECTION_NAME
 const catalogFileName = `./${process.env.PRODUCT_CATALOG_PATH}/${process.env.PRODUCT_CATALOG_FILE}`
 
 MongoClient.connect(connectionString, { useUnifiedTopology: true })

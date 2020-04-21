@@ -31,19 +31,24 @@ exports.validateProduct = () => {
 }
 
 // return immutable object with new field picture set by name
-exports.createProduct = (body) => {
+exports.createProduct = (body, extensible = false) => {
   try {
     const { category, name, brand, model, price } = body
     const productName = name.split(' ') // split to 2 strings, name is a validated string with 1 white space
     const picture = `${process.env.DUMMY_IMAGE_URL}${productName[0]}+${productName[1]}`
-    return Object.freeze({
+    const newObj = {
       category,
       name,
       brand,
       model,
       price,
       picture
-    })
+    }
+    if (extensible) {
+      return newObj
+    } else {
+      return Object.freeze(newObj)
+    }
   } catch (err) {
     return undefined
   }
@@ -76,7 +81,7 @@ const filterProducts = (products, categories) => {
 }
 
 // sort products by allowed sort options, error otherwise
-const sortProducts = (products, sort) => {
+exports.sortProducts = (products, sort) => {
   if (sort) {
     switch (sort) {
       case 'name-asc':
@@ -100,5 +105,5 @@ exports.readProducts = async (query) => {
   const data = await fsp.readFile(catalogFileName)
   const products = JSON.parse(data)
   const filtered = filterProducts(products, query.categories)
-  return sortProducts(filtered, query.sort)
+  return exports.sortProducts(filtered, query.sort)
 }
