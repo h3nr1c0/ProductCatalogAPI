@@ -109,15 +109,6 @@ exports.readProducts = async (query) => {
   return exports.sortProducts(filtered, query.sort)
 }
 
-const filterBy = (arr, filterBy) => arr.filter(function (item) {
-  for (var key in filterBy) {
-    if (item[key] === undefined || item[key] !== filterBy[key]) {
-      return false
-    }
-  }
-  return true
-})
-
 // read products from file and process them by received query
 exports.deleteProduct = async (query) => {
   const data = await fsp.readFile(catalogFileName)

@@ -2,12 +2,12 @@
 const express = require('express')
 const router = express.Router()
 const { validationResult } = require('express-validator')
-const { validateProduct, createProduct, sortProducts, deleteProduct } = require('../src/product')
+const { validateProduct, createProduct, sortProducts } = require('../src/product')
 // const { eqProduct } = require('../utils/product-helper')
 require('dotenv').config()
 
 router
-  // POST Add new product
+// POST Add new product
   /**
   * @api {post} /catalog/products Add new product
   * @apiVersion 1.0.0
@@ -48,7 +48,7 @@ router
       .catch(err => res.status(422).send(err))
   })
 
-  // GET products filtered and sorted
+// GET products filtered and sorted
   /**
       * @api {get} /catalog/products?categories[]=switches&categories[]=sensors&sort=price-desc
       * @apiVersion 1.0.0
@@ -100,9 +100,9 @@ router
       .catch(err => res.status(422).send(err))
   })
 
-  // DELETE product
+// DELETE product
   /**
-  * @api {delete} /catalog/products delete product
+  * @api {delete} /catalog/products Delete product
   * @apiVersion 1.0.0
   * @apiName Delete product
   * @apiGroup Products
@@ -122,7 +122,7 @@ router
   * $http.defaults.headers.common["Authorization"] = access_token;
   *
   * @apiSuccessExample {json} Success response:
-  *     HTTPS 201 OK
+  *     HTTPS 200 OK
   *
   * @apiUse UnauthorizedError
   */
@@ -143,9 +143,6 @@ router
         }
       })
       .catch(err => res.status(422).send(err))
-    // deleteProduct(product)
-    //   .then(_ => res.status(201).send())
-    //   .catch(err => res.status(422).send(err))
   })
 
 module.exports = router
