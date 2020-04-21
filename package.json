@@ -46,6 +46,7 @@
     "test-all": "mocha 'test/*.js'",
     "test-auth": "mocha 'utils/testAuth.js'",
     "test-read": "mocha 'test/readOnly.js'",
+    "test-delete": "mocha 'test/delete.js'",
     "saveNewToken": "mocha 'utils/saveNewToken.js'",
     "generateDoc": "gulp apidoc",
     "startNodemon": "nodemon index",

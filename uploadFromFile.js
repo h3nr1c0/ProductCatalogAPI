@@ -19,13 +19,14 @@ const catalogFileName = `./${process.env.PRODUCT_CATALOG_PATH}/${process.env.PRO
 MongoClient.connect(connectionString, { useUnifiedTopology: true })
   .then(client => {
     console.log('Connected to Database')
+    // read catalog from file
     fsp.readFile(catalogFileName)
       .then(data => {
         const products = JSON.parse(data)
 
         const db = client.db(dbName)
         const dbCatalog = db.collection(collectioName)
-
+        // upload catalog to db
         dbCatalog.insertMany(products)
           .then(result => {
             console.log('catalog data uploaded')

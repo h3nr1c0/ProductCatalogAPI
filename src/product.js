@@ -1,5 +1,6 @@
 const fsp = require('fs').promises
 const { check } = require('express-validator')
+const { eqProduct } = require('../utils/product-helper')
 
 require('dotenv').config()
 
@@ -106,4 +107,28 @@ exports.readProducts = async (query) => {
   const products = JSON.parse(data)
   const filtered = filterProducts(products, query.categories)
   return exports.sortProducts(filtered, query.sort)
+}
+
+const filterBy = (arr, filterBy) => arr.filter(function (item) {
+  for (var key in filterBy) {
+    if (item[key] === undefined || item[key] !== filterBy[key]) {
+      return false
+    }
+  }
+  return true
+})
+
+// read products from file and process them by received query
+exports.deleteProduct = async (query) => {
+  const data = await fsp.readFile(catalogFileName)
+  const products = JSON.parse(data)
+  // const deleteArr = filterBy(products, { name: query.name })
+  const updatedArr = this.filterArr(products, query)
+  // const updatedArr = products.filter(item => !EqProduct(item, query))
+  await fsp.writeFile(catalogFileName, JSON.stringify(updatedArr))
+  // .then(_ => { return })
+}
+
+exports.filterArr = (arr, delItem) => {
+  return arr.filter(item => !eqProduct(item, delItem))
 }

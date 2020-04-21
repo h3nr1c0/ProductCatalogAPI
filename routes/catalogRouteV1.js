@@ -2,12 +2,12 @@
 const express = require('express')
 const router = express.Router()
 const { validationResult } = require('express-validator')
-const { validateProduct, createProduct, sortProducts } = require('../src/product')
-
+const { validateProduct, createProduct, sortProducts, deleteProduct } = require('../src/product')
+// const { eqProduct } = require('../utils/product-helper')
 require('dotenv').config()
 
 router
-// POST Add new product
+  // POST Add new product
   /**
   * @api {post} /catalog/products Add new product
   * @apiVersion 1.0.0
@@ -48,8 +48,7 @@ router
       .catch(err => res.status(422).send(err))
   })
 
-// ----------------------------------------------------------------------------------------------------------------
-// get products filtered and sorted
+  // GET products filtered and sorted
   /**
       * @api {get} /catalog/products?categories[]=switches&categories[]=sensors&sort=price-desc
       * @apiVersion 1.0.0
@@ -99,6 +98,54 @@ router
         res.status(200).send(sorted)
       })
       .catch(err => res.status(422).send(err))
+  })
+
+  // DELETE product
+  /**
+  * @api {delete} /catalog/products delete product
+  * @apiVersion 1.0.0
+  * @apiName Delete product
+  * @apiGroup Products
+  * @apiPermission authenticated user
+  *
+  * @apiParam (Request body) {String="switches", "sensors", "luminaires"} category Product category
+  * @apiParam (Request body) {String{2..30}} name Product name
+  * @apiParam (Request body) {String{4..16}} brand Product brand
+  * @apiParam (Request body) {String{3..10}} model Product model
+  *
+  * @apiExample {js} Example usage:
+  * const data =  {"category": "luminaires",
+  *          "name": "Sample name 1",
+  *          "brand": "Brand name 1",
+  *          "model": "Model name 1"}
+  *
+  * $http.defaults.headers.common["Authorization"] = access_token;
+  *
+  * @apiSuccessExample {json} Success response:
+  *     HTTPS 201 OK
+  *
+  * @apiUse UnauthorizedError
+  */
+  .delete(process.env.HOST_PREFIX, async (req, res) => {
+    const dbCatalog = req.app.locals.dbCatalog
+    const product = req.body
+    const query = {
+      category: product.category,
+      name: product.name,
+      model: product.model
+    }
+    dbCatalog.remove(query)
+      .then(result => {
+        if (result.deletedCount === 0) {
+          return res.status(201).json('No product to delete')
+        } else {
+          res.status(200).json(`Deleted product with name: ${query.name}`)
+        }
+      })
+      .catch(err => res.status(422).send(err))
+    // deleteProduct(product)
+    //   .then(_ => res.status(201).send())
+    //   .catch(err => res.status(422).send(err))
   })
 
 module.exports = router
