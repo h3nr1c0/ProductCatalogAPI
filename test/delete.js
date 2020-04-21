@@ -47,9 +47,7 @@ describe('test adding products', function () {
             newProduct.picture = `${process.env.DUMMY_IMAGE_URL}${productName[0]}+${productName[1]}`
             expect(res.statusCode).to.equal(200)
             expect(res.body).to.be.an('array').that.is.not.empty
-            const lastProduct = res.body.pop()
-            expect(lastProduct).to.contain.keys(['category', 'name', 'brand', 'model', 'price', 'picture'])
-            expect(lastProduct).to.be.eql(newProduct, 'Added equals to the last product in the catalog')
+            expect(isInArray(res.body, newProduct)).to.be.true
             done()
           })
       })
@@ -75,7 +73,7 @@ describe('test adding products', function () {
       .end(function (_err, res) {
         if (_err) throw _err
         expect(res.statusCode).to.equal(200)
-        // get all products and get last item from response array for comparison
+        // get all products and check if deleted is still there
         appBaseRoute
           .get('')
           .set(loadedTokenHeader)

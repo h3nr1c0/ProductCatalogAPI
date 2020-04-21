@@ -113,11 +113,8 @@ exports.readProducts = async (query) => {
 exports.deleteProduct = async (query) => {
   const data = await fsp.readFile(catalogFileName)
   const products = JSON.parse(data)
-  // const deleteArr = filterBy(products, { name: query.name })
   const updatedArr = this.filterArr(products, query)
-  // const updatedArr = products.filter(item => !EqProduct(item, query))
   await fsp.writeFile(catalogFileName, JSON.stringify(updatedArr))
-  // .then(_ => { return })
 }
 
 exports.filterArr = (arr, delItem) => {
