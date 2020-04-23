@@ -94,7 +94,9 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
     app.locals.dbCatalog = dbCatalog
 
     // START THE SERVER
-    const server = app.listen(PORT)
+    const server = app.listen(PORT, () => {
+      console.info(`server running on: http://localhost:${PORT}`)
+    })
 
     // Handle ^C close DB
     process.on('SIGINT', _ => {
@@ -147,8 +149,6 @@ if (app.get('env') === 'development') {
     })
   })
 }
-
-console.info(`server running on: http://localhost:${PORT}`)
 
 // root
 app.get('', (req, res) => res.status(403).send(`add ${process.env.HOST_PREFIX} to end of path`))
